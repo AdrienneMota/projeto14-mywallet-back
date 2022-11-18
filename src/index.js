@@ -56,8 +56,27 @@ app.post('/sign-up', async (req, res) => {
     }
 })
 
-app.post('/sign-in', (req, res) => {
-    const user = req.body
+app.post('/sign-in', async (req, res) => {
+    const {email, password} = req.body
+    const token = creatToken()
+
+    try {
+        const userExist = await users.findOne({ email })
+        if(!userExist){
+            return res.status(401).send({message: "usuário inexistente"})
+        }
+
+        const hashPassword = bcrypt.compareSync(password, userExist.password)
+        if(!hashPassword){
+            return res.status(401).send({message: "senha incorreta"})
+        }
+
+        await db.collection('sessions').insertOne({token, userId: userExist._ids})
+        res.send(token)
+    } catch (error) {
+        console.log(error)
+        res.sendStatus(500)
+    }
 })
 
 //função para indicar em qual porta o front deve abrir para se comunicar com esta api
