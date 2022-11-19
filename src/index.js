@@ -31,6 +31,8 @@ try {
 const db = mongoClient.db('dbMywallet')
 const users = db.collection('users')
 
+//ROTAS//////////////////////////////////////////
+
 app.post('/sign-up', async (req, res) => {
     const user = req.body
 
@@ -71,7 +73,12 @@ app.post('/sign-in', async (req, res) => {
             return res.status(401).send({message: "senha incorreta"})
         }
 
-        await db.collection('sessions').insertOne({token, userId: userExist._ids})
+        const sessionOpened = await db.collection('sessions').findOne({ userId: userExist._id })//eu poderia usar o token inves do userId
+        if(sessionOpened){
+            return res.status(401).send({message: "Você já está logado, saia para logar novamente"})
+        }   
+
+        await db.collection('sessions').insertOne({token, userId: userExist._id})
         res.send(token)
     } catch (error) {
         console.log(error)
