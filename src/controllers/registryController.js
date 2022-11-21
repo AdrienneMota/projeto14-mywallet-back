@@ -30,7 +30,7 @@ export const createRegistries = async (req, res) => {
                     .reduce((total, entrada) => total + entrada)
             }
             else {
-                entradas = 0.00
+                entradas = 0
             }
 
             if (existSaida) {
@@ -38,7 +38,7 @@ export const createRegistries = async (req, res) => {
                     .map((saida) => saida.value)
                     .reduce((total, saida) => total + saida)
             } else {
-                saidas = 0.00
+                saidas = 0
             }
             
             if(registry.type === "entrada"){
@@ -57,7 +57,7 @@ export const createRegistries = async (req, res) => {
         
 
 
-        await registries.insertOne({ ...registry, balance: Number(balance.toFixed(2)), userId: sessionUser.userId, date: dayjs().format('DD/MM') })
+        await registries.insertOne({ ...registry, balance, userId: sessionUser.userId, date: dayjs().format('DD/MM') })
         res.sendStatus(201)
     } catch (error) {
         console.log(error)
