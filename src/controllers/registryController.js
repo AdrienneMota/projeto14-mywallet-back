@@ -27,7 +27,7 @@ export const createRegistries = async (req, res) => {
             if (existEntrada) {
                 entradas = oldRegistries.filter((registry) => registry.type === 'entrada')
                     .map((entrada) => entrada.value)
-                    .reduce((total, entrada) => total += entrada)
+                    .reduce((total, entrada) => total + entrada)
             }
             else {
                 entradas = 0.00
@@ -36,11 +36,16 @@ export const createRegistries = async (req, res) => {
             if (existSaida) {
                 saidas = oldRegistries.filter((registry) => registry.type === 'saida')
                     .map((saida) => saida.value)
-                    .reduce((total, saida) => total += saida)
+                    .reduce((total, saida) => total + saida)
             } else {
                 saidas = 0.00
             }
-            balance = entradas - saidas
+            
+            if(registry.type === "entrada"){
+                balance = (entradas - saidas) + registry.value
+            }else{
+                balance = (entradas - saidas) - registry.value
+            }
         } else {
             if (registry.type === "entrada") {
                 balance = registry.value
@@ -49,8 +54,10 @@ export const createRegistries = async (req, res) => {
             }
         }
 
+        
 
-        await registries.insertOne({ ...registry, balance, userId: sessionUser.userId, date: dayjs().format('DD/MM') })
+
+        await registries.insertOne({ ...registry, balance: Number(balance.toFixed(2)), userId: sessionUser.userId, date: dayjs().format('DD/MM') })
         res.sendStatus(201)
     } catch (error) {
         console.log(error)

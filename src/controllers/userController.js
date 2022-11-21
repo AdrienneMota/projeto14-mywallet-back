@@ -62,7 +62,7 @@ export const signOut = async(req, res) => {
 
     try {
         await sessions.deleteOne({token})
-        res.status(200)
+        res.sendStatus(200)
     } catch (error) {
         console.log(error)
         res.status(500).send(error)
