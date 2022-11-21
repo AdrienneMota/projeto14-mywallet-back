@@ -4,14 +4,10 @@ import registrySchema from "../models/registrySchema.js"
 import { sessions, registries, users } from "../database/db.js"
 
 export const createRegistries = async (req, res) => {
-    const {authorization} = req.headers
+   
     const registry = req.body
-
-    try {     
-        const token = authorization?.replace('Bearer ', '')   
-        if(!token){
-            return res.status(401).send({message: 'Usuário não autorizado'})
-        }   
+    const token = req.token
+    try {         
     
         const {error} = registrySchema.validate(registry, {abortEarly: false})
         if(error){
@@ -29,15 +25,10 @@ export const createRegistries = async (req, res) => {
 }
 
 export const getRegistries = async (req, res) => {
-    const { authorization } = req.headers
+    const token = req.token
 
     try {
-        const token = authorization?.replace('Bearer ', '')
-        if(!token){
-            return res.status(401).send({message: "usuário não autorizado"})
-        }
-    
-        
+             
         const sessionUser = await sessions.findOne({token})
         const user = await users.findOne({_id: sessionUser?.userId})
         if(!user){

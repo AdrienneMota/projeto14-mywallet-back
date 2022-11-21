@@ -58,14 +58,9 @@ export const signIn = async (req, res) => {
 }
 
 export const signOut = async(req, res) => {
-    const { authorization } = req.headers
+    const token = req.token
 
     try {
-        const token = authorization?.replace('Bearer ', '')
-        if(!token){
-            return res.status(401).send({message: "usuário não autorizado"})
-        }
-
         await sessions.deleteOne({token})
         res.status(200)
     } catch (error) {
