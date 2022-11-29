@@ -10,7 +10,7 @@ export const signUp = async (req, res) => {
     try {        
         const emailExist = await users.findOne({email: user.email})
         if(emailExist){
-            return res.status(409).send('Email já cadastrado')
+            return res.status(409).send({message:'Email já cadastrado'})
         }
         const { error } = userSchema.validate(user, { abortEarly: false })
         if(error){
@@ -44,9 +44,10 @@ export const signIn = async (req, res) => {
             return res.status(401).send({message: "senha incorreta"})
         }
 
-        const sessionOpened = await sessions.findOne({ userId: userExist._id })//eu poderia usar o token inves do userId
+        const sessionOpened = await sessions.findOne({ userId: userExist._id })
         if(sessionOpened){
-            return res.status(401).send({message: "Você já está logado, saia para logar novamente"})
+            const token = sessionOpened.token
+            return res.send(token)
         }   
 
         await sessions.insertOne({token, userId: userExist._id})

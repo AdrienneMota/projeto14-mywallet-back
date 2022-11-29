@@ -18,6 +18,7 @@ export const createRegistries = async (req, res) => {
         const sessionUser = await sessions.findOne({ token })
         const oldRegistries = await registries.find({ userId: sessionUser.userId }).toArray()
         let balance
+        let valor = parseFloat(registry.value)
 
         if (oldRegistries.length) {
             const existEntrada = oldRegistries.find((r) => r.type === "entrada")
@@ -42,21 +43,18 @@ export const createRegistries = async (req, res) => {
             }
             
             if(registry.type === "entrada"){
-                balance = (entradas - saidas) + registry.value
+                balance = (entradas - saidas) + valor
             }else{
-                balance = (entradas - saidas) - registry.value
+                balance = (entradas - saidas) - valor
             }
         } else {
             if (registry.type === "entrada") {
-                balance = registry.value
+                balance = valor
             } else {
-                balance = (0 - registry.value)
+                balance = (0 - valor)
             }
         }
-
-        
-
-
+   
         await registries.insertOne({ ...registry, balance, userId: sessionUser.userId, date: dayjs().format('DD/MM') })
         res.sendStatus(201)
     } catch (error) {
@@ -77,8 +75,12 @@ export const getRegistries = async (req, res) => {
         }
 
         const registriesUser = await registries.find({ userId: sessionUser.userId }).toArray()
+        let balance = 0
+        if(registriesUser.length){
+            balance = registriesUser[registriesUser.length - 1]?.balance
+        }
 
-        res.send({ registriesUser, name: user.name })
+        res.send({ registriesUser, name: user.name, balance})
 
     } catch (error) {
         console.log(error)
